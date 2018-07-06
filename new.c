@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<ctype.h>
 
 typedef struct possible_indexArray_and_events{
 	int event;
@@ -8,163 +9,167 @@ typedef struct possible_indexArray_and_events{
 	int row;
 }possible;
 
-
 void printPuzzle(char puzzle[100][100], int count){
 	int i,j;
 	for(i=0;i<count;i++){
-		for(j=0;j!='\0';j++){
+		for(j=0;j<strlen(puzzle[i]);j++){
 			printf("%c",puzzle[i][j]);
 		}
 		printf("\n");
 	}
 }
 
-void fill_hor(char puzzle[100][100], char words[100][100], possible hor, int length,int count){
+void fill_hor(char puzzle[100][100], char * word, possible hor){
 	int col=hor.col;
 	int row=hor.row;
-	int i,j,k;
-	for(i=col;i<=length; i++){
-		for(k=0; k<=length; k++){
-			puzzle[row][i]=words[count][k];
-		}
+	int i,j,k=0;
+	for(i=col;i<col+strlen(word); i++){
+		puzzle[row][i]=word[k];
+		k++	;	
 	}
 }
 
-void fill_ver(char puzzle[100][100], char words[100][100], possible ver, int length,int count){
+void fill_ver(char puzzle[100][100], char * word, possible ver){
 	int col=ver.col;
 	int row=ver.row;
-	int i,k;
-	for(i=row;i<=length; i++){
-		for(k=0; k<=length; k++){
-			puzzle[row][i]=words[count][k];
-		}
+	int i,k=0;
+	for(i=row;i<row+strlen(word); i++){
+		puzzle[i][col]=word[k];
+		k++;
+		
 	}
 }
 
-possible possible_horizontal(int length, char puzzle[100][100],int puzzleRows){
-	int col, row;
-	int count=0,spaces=0;
+possible possible_horizontal(char * word, char puzzle[100][100],int puzzleRows){
+	int col, row, q=0;
+	int spaces=0;
 	possible horizontal;
 	horizontal.event=0;
-	for (row=0; row!=puzzleRows; row++){
-		for (col=0; col='\0'; col++){
-			if(puzzle[row][col]=='#'){
+
+	for (row=0; row<puzzleRows; row++){
+		spaces=0;
+		for (col=0; col<strlen(puzzle[row]); col++){
+			if(puzzle[row][col]=='#' || puzzle[row][col]==word[spaces]){
 				spaces++;
-				count++;
 			}else{
-				if(spaces==length){
+				if(spaces==strlen(word)){
 					horizontal.event++;
 					horizontal.row=row;
-					horizontal.col=col-length;
+					horizontal.col=col-strlen(word);
 				}
 				spaces=0;
-				count=0;
 			}
 		}
-		if(spaces==length){
+		if(spaces==strlen(word)){
 			horizontal.event++;
 			horizontal.row=row;
-			horizontal.col=col-length;
+			horizontal.col=col-strlen(word);
 		}
-		spaces=0;
-		count=0;
 	}
 
 	return horizontal;
 }
 
-possible possible_vertical(int length, char puzzle[100][100], int puzzle_rows){
-	int col, row;
-	int count=0,spaces=0;
-	possible vertical;
-	vertical.event=0;
-	for (col=0; col='\0'; col++){
-		for (row=0; row!=puzzle_rows; row++){
-			if(puzzle[row][col]=='#'){
+possible possible_vertical(char * word, char puzzle[100][100],int puzzleRows){
+	int col, row, q=0;
+	int spaces=0;
+	possible horizontal;
+	horizontal.event=0;
+
+	for (col=0; col<strlen(puzzle[0]); col++){
+		spaces=0;
+		for (row=0; row<puzzleRows; row++){
+			if(puzzle[row][col]=='#' || puzzle[row][col]==word[spaces]){
 				spaces++;
-				count++;
 			}else{
-				if(spaces==length){
-					vertical.event++;
-					vertical.row=row-length;
-					vertical.col=col;
+				if(spaces==strlen(word)){
+					horizontal.event++;
+					horizontal.col=col;
+					horizontal.row=row-strlen(word);
 				}
 				spaces=0;
-				count=0;
 			}
 		}
-		if(spaces==length){
-			vertical.event++;
-			vertical.row=row-length;
-			vertical.col=col;
+		if(spaces==strlen(word)){
+			horizontal.event++;
+			horizontal.col=col;
+			horizontal.row=row-strlen(word);
 		}
-		spaces=0;
-		count=0;
 	}
 
-	return vertical;
+	return horizontal;
 }
-		
+
+
 
 int main(){
-	static char puzzle[100][100];// puzzle array
-	char line[100]; //scanning words
-	char words[100][100];// word array
-	int length[10];// array of lengths of words
-	char character;// scanning inputs
-	int row_p=0,col_p=0,row_w=0,col_w=0,newline_count=0;
-
+	static char puzzle[100][100];
+	char words[100][100];
+	char character;
+	int i=0,j=0,newline_count=0;
 	while (newline_count<2){
+		
 		scanf("%c", &character);
-		if (character!='\n'){
-			puzzle[row_p][col_p]=character;
-			col_p++;
-		}else{
-			puzzle[row_p][col_p ++]='\0';
-			row_p++;
-			col_p=0;
+		
+		if(character == '\n'){
 			newline_count++;
-		}
 			
+		}else {
+			newline_count=0;
+			puzzle[i][j]=character;
+			j++;
+		}
+		if(newline_count==1){
+				i++;
+				words[i][j]='\0';
+				j=0;
+		}
 	}
-	int puzzle_rows = row_p;	
-
-	while (newline_count<4){
+	
+	int row_count=i;
+	newline_count = 0;
+	i=0; j=0;
+	
+	while (newline_count<2){
+		
 		scanf("%c", &character);
-		if (character!='\n'){
-			words[row_w][col_w]=toupper(character);
-			col_w++;
-		}else{
-			puzzle[row_w][col_w ++]='\0';
-			row_w++;
-			col_w=0;
+		
+		if(character == '\n'){
 			newline_count++;
-		}
 			
+		}else {
+			newline_count=0;
+			words[i][j]=toupper(character);
+			j++;
+		}
+		if(newline_count==1){
+			i++;
+			words[i][j]='\0';
+			j=0;
+		}
 	}
-	int word_count=row_w;
+	
+	int word_count = i;
 
-	int count;
-	for (count=0; count<=word_count; count++){
+	for(i=0;i<word_count;i++){
 		possible hor,ver;
-		int word_length=length[count];
 
-		hor= possible_horizontal(word_length,puzzle,puzzle_rows);
-		ver= possible_vertical(word_length,puzzle,puzzle_rows);
+		hor = possible_horizontal(words[i],puzzle,row_count);
+		ver = possible_vertical(words[i],puzzle,row_count);
 
-		if (hor.event + ver.event==1){
-			if(hor.event==1){
-				fill_hor(puzzle,words, hor, word_length,count);
-			}else{
-				fill_ver(puzzle,words, ver, word_length,count);
-			}
+		if (hor.event==1){
+			fill_hor(puzzle,words[i], hor);
+		}else if(ver.event == 1){
+			fill_ver(puzzle,words[i], ver);
+		}else if(hor.event + ver.event==0){
+			printf("IMPOSSIBLE\n");
+			return 0;
 		}
 	}
-
 
 	
-	printPuzzle(puzzle, puzzle_rows);
+	printPuzzle(puzzle, row_count);
 
-			
+		
 return 0;
 }
